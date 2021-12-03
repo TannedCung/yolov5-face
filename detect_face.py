@@ -48,15 +48,15 @@ def scale_coords_landmarks(img1_shape, coords, img0_shape, ratio_pad=None):
     return coords
 
 def show_results(img, xywh, conf, landmarks, class_num):
+    clors = [(0,0,255),(0,255,0),(255,0,0),(255,255,0),(0,255,255)]
     h,w,c = img.shape
     tl = 1 or round(0.002 * (h + w) / 2) + 1  # line/font thickness
     x1 = int(xywh[0] * w - 0.5 * xywh[2] * w)
     y1 = int(xywh[1] * h - 0.5 * xywh[3] * h)
     x2 = int(xywh[0] * w + 0.5 * xywh[2] * w)
     y2 = int(xywh[1] * h + 0.5 * xywh[3] * h)
-    cv2.rectangle(img, (x1,y1), (x2, y2), (0,255,0), thickness=tl, lineType=cv2.LINE_AA)
+    cv2.rectangle(img, (x1,y1), (x2, y2), clors[int(class_num%len(clors))], thickness=tl, lineType=cv2.LINE_AA)
 
-    clors = [(255,0,0),(0,255,0),(0,0,255),(255,255,0),(0,255,255)]
 
     for i in range(5):
         point_x = int(landmarks[2 * i] * w)
@@ -70,9 +70,9 @@ def show_results(img, xywh, conf, landmarks, class_num):
 
 
 
-def detect_one(model, image_path, device):
+def detect_one(model, image_path, device, img_size):
     # Load model
-    img_size = 800
+    # img_size = 800
     conf_thres = 0.3
     iou_thres = 0.5
 
@@ -145,4 +145,4 @@ if __name__ == '__main__':
     print(opt)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = load_model(opt.weights, device)
-    detect_one(model, opt.image, device)
+    detect_one(model, opt.image, device, opt.img_size)

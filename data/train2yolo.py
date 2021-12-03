@@ -65,9 +65,9 @@ class WiderFaceDetection(data.Dataset):
             annotation[0, 12] = label[16]  # l4_x
             annotation[0, 13] = label[17]  # l4_y
             if (annotation[0, 4]<0):
-                annotation[0, 14] = -1
+                annotation[0, 14] = -1*label[18]
             else:
-                annotation[0, 14] = 1
+                annotation[0, 14] = label[18]
 
             annotations = np.append(annotations, annotation, axis=0)
         target = np.array(annotations)
@@ -100,15 +100,16 @@ def detection_collate(batch):
 
     return (torch.stack(imgs, 0), targets)
 
-save_path = '/ssd_1t/derron/yolov5-face/data/widerface/train'
-aa=WiderFaceDetection("/ssd_1t/derron/yolov5-face/data/widerface/widerface/train/label.txt")
+img_save_path = '/data/widerface/real_mask/train/images'
+label_save_path = '/data/widerface/real_mask/train/labels'
+aa=WiderFaceDetection("/data/widerface/real_mask/train/label.txt")
 for i in range(len(aa.imgs_path)):
     print(i, aa.imgs_path[i])
-    img = cv2.imread(aa.imgs_path[i])
+    img = cv2.imread(aa.imgs_path[i].replace("/images", "/_images"))
     base_img = os.path.basename(aa.imgs_path[i])
     base_txt = os.path.basename(aa.imgs_path[i])[:-4] +".txt"
-    save_img_path = os.path.join(save_path, base_img)
-    save_txt_path = os.path.join(save_path, base_txt)
+    save_img_path = os.path.join(img_save_path, base_img)
+    save_txt_path = os.path.join(label_save_path, base_txt)
     with open(save_txt_path, "w") as f:
         height, width, _ = img.shape
         labels = aa.words[i]
@@ -140,7 +141,8 @@ for i in range(len(aa.imgs_path)):
             annotation[0, 11] = label[14] / height  # l3_y
             annotation[0, 12] = label[16] / width  # l4_x
             annotation[0, 13] = label[17] / height  # l4_y
-            str_label="0 "
+            str_label="{} ".format(abs(label[-1])-1)
+            # str_label="0 "
             for i in range(len(annotation[0])):
                 str_label =str_label+" "+str(annotation[0][i])
             str_label = str_label.replace('[', '').replace(']', '')
