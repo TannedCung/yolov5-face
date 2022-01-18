@@ -93,7 +93,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
         model = Model(opt.cfg, ch=3, nc=nc).to(device)  # create
 
     # Freeze
-    freeze = []  # parameter names to freeze (full or partial)
+    freeze = opt.freeze  # parameter names to freeze (full or partial)
     for k, v in model.named_parameters():
         v.requires_grad = True  # train all layers
         if any(x in k for x in freeze):
@@ -458,6 +458,7 @@ if __name__ == '__main__':
     parser.add_argument('--project', default='runs/train', help='save to project/name')
     parser.add_argument('--name', default='exp', help='save to project/name')
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
+    parser.add_argument('--freeze', nargs='+', type=str, default=[], help='layer to freeze')
     opt = parser.parse_args()
 
     # Set DDP variables
