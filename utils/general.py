@@ -376,7 +376,7 @@ def jaccard_diou(box_a, box_b, iscrowd:bool=False):
     return out if use_batch else out.squeeze(0)
 
 
-def non_max_suppression_face(prediction, conf_thres=0.25, iou_thres=0.45, classes=None, agnostic=False, labels=()):
+def non_max_suppression_face(prediction, conf_thres=0.25, iou_thres=0.45, classes=None, agnostic=True, labels=()):
     """Performs Non-Maximum Suppression (NMS) on inference results
     Returns:
          detections with shape: nx6 (x1, y1, x2, y2, conf, cls)
@@ -419,12 +419,12 @@ def non_max_suppression_face(prediction, conf_thres=0.25, iou_thres=0.45, classe
         box = xywh2xyxy(x[:, :4])
 
         # Detections matrix nx6 (xyxy, conf, landmarks, cls)
-        if multi_label:
-            i, j = (x[:, 15:] > conf_thres).nonzero(as_tuple=False).T
-            x = torch.cat((box[i], x[i, j + 15, None], x[i, 5:15] ,j[:, None].float()), 1)
-        else:  # best class only
-            conf, j = x[:, 15:].max(1, keepdim=True)
-            x = torch.cat((box, conf, x[:, 5:15], j.float()), 1)[conf.view(-1) > conf_thres]
+        # if multi_label:
+        #     i, j = (x[:, 15:] > conf_thres).nonzero(as_tuple=False).T
+        #     x = torch.cat((box[i], x[i, j + 15, None], x[i, 5:15] ,j[:, None].float()), 1)
+        # else:  # best class only
+        conf, j = x[:, 15:].max(1, keepdim=True)
+        x = torch.cat((box, conf, x[:, 5:15], j.float()), 1)[conf.view(-1) > conf_thres]
 
         # Filter by class
         if classes is not None:
@@ -436,7 +436,7 @@ def non_max_suppression_face(prediction, conf_thres=0.25, iou_thres=0.45, classe
             continue
 
         # Batched NMS
-        c = x[:, 15:16] * (0 if agnostic else max_wh)  # classes
+        c = x[:, 15:17] * (0 if agnostic else max_wh)  # classes
         boxes, scores = x[:, :4] + c, x[:, 4]  # boxes (offset by class), scores
         i = torchvision.ops.nms(boxes, scores, iou_thres)  # NMS
         #if i.shape[0] > max_det:  # limit detections
