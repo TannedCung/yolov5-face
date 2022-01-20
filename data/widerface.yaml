@@ -10,10 +10,10 @@
 download: bash data/scripts/get_voc.sh
 
 # train and val data as 1) directory: path/images/, 2) file: path/images.txt, or 3) list: [path1/images/, path2/images/]
-train: [/kaggle/working/yolofacedata/real_mask/train/images, /kaggle/working/yolofacedata/widerface/train/images]  # 16551 images
-# train: [/workspace/data/real_mask/train/images,  /workspace/data/widerface/train/images]   # 16551 images
-val: /kaggle/working/yolofacedata/widerface/train/images  # 16551 images
-# val: /workspace/data/widerface/train/images # 4952 images
+# train: [/kaggle/working/yolofacedata/real_mask/train/images, /kaggle/working/yolofacedata/widerface/train/images]  # 16551 images
+train: [/workspace/data/real_mask/train/images,  /workspace/data/widerface/train/images, /workspace/data/part_masked/train/images]   # 16551 images
+# val: /kaggle/working/yolofacedata/widerface/train/images  # 16551 images
+val: /workspace/data/widerface/train/images # 4952 images
 
 # number of classes
 nc: 2
