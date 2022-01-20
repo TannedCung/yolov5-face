@@ -143,9 +143,9 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
     start_epoch, best_fitness = 0, 0.0
     if pretrained:
         # Optimizer
-        # if ckpt['optimizer'] is not None:
-            # optimizer.load_state_dict(ckpt['optimizer'])
-            # best_fitness = ckpt['best_fitness']
+        if ckpt['optimizer'] is not None:
+            optimizer.load_state_dict(ckpt['optimizer'])
+            best_fitness = ckpt['best_fitness']
 
         # Results
         if ckpt.get('training_results') is not None:
@@ -328,7 +328,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
         scheduler.step()
 
         # DDP process 0 or single-GPU
-        if rank in [-1, 0] and epoch > 5:
+        if rank in [-1, 0] and epoch >=0:
             # mAP
             if ema:
                 ema.update_attr(model, include=['yaml', 'nc', 'hyp', 'gr', 'names', 'stride', 'class_weights'])

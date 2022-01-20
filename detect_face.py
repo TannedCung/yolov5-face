@@ -76,7 +76,10 @@ def detect_one(model, image_path, device, img_size):
     conf_thres = 0.3
     iou_thres = 0.5
 
-    orgimg = cv2.imread(image_path)  # BGR
+    try:
+        orgimg = cv2.imread(image_path)  # BGR
+    except:
+        orgimg = image_path
     img0 = copy.deepcopy(orgimg)
     assert orgimg is not None, 'Image Not Found ' + image_path
     h0, w0 = orgimg.shape[:2]  # orig hw
@@ -87,9 +90,9 @@ def detect_one(model, image_path, device, img_size):
 
     imgsz = check_img_size(img_size, s=model.stride.max())  # check img_size
 
-    img = letterbox(img0, new_shape=imgsz)[0]
+    _img = letterbox(img0, new_shape=imgsz)[0]
     # Convert
-    img = img[:, :, ::-1].transpose(2, 0, 1).copy()  # BGR to RGB, to 3x416x416
+    img = _img[:, :, ::-1].transpose(2, 0, 1).copy()  # BGR to RGB, to 3x416x416
 
     # Run inference
     t0 = time.time()
@@ -102,10 +105,12 @@ def detect_one(model, image_path, device, img_size):
 
     # Inference
     t1 = time_synchronized()
+    start = time.time()
     pred = model(img)[0]
-
+    mid = time.time()
     # Apply NMS
     pred = non_max_suppression_face(pred, conf_thres, iou_thres)
+    last = time.time()
 
     print('img.shape: ', img.shape)
     print('orgimg.shape: ', orgimg.shape)
@@ -130,17 +135,16 @@ def detect_one(model, image_path, device, img_size):
                 landmarks = (det[j, 5:15].view(1, 10) / gn_lks).view(-1).tolist()
                 class_num = det[j, 15].cpu().numpy()
                 orgimg = show_results(orgimg, xywh, conf, landmarks, class_num)
-
     cv2.imwrite('result.jpg', orgimg)
-
-
+    return orgimg, mid-start, last-mid
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--weights', nargs='+', type=str, default='runs/train/exp5/weights/last.pt', help='model.pt path(s)')
-    parser.add_argument('--image', type=str, default='data/images/test.jpg', help='source')  # file/folder, 0 for webcam
+    parser.add_argument('--weights', nargs='+', type=str, default='/workspace/yoloface/runs/train/exp52/weights/best.pt', help='model.pt path(s)')
+    parser.add_argument('--image', type=str, default='/workspace/yoloface/test/close_mask.jpeg', help='source')  # file/folder, 0 for webcam
     parser.add_argument('--img-size', type=int, default=640, help='inference size (pixels)')
+    # parser.add_argument('--img_size', nargs='+', type=int, default=[640, 640], help='image size')  # height, width
     opt = parser.parse_args()
     print(opt)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
