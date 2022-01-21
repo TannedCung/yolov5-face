@@ -143,7 +143,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
     start_epoch, best_fitness = 0, 0.0
     if pretrained:
         # Optimizer
-        if ckpt['optimizer'] is not None:
+        if ckpt['optimizer'] is not None and opt.opt_resume:
             optimizer.load_state_dict(ckpt['optimizer'])
             best_fitness = ckpt['best_fitness']
 
@@ -439,6 +439,7 @@ if __name__ == '__main__':
     parser.add_argument('--img-size', nargs='+', type=int, default=[800, 800], help='[train, test] image sizes')
     parser.add_argument('--rect', action='store_true', help='rectangular training')
     parser.add_argument('--resume', nargs='?', const=True, default=False, help='resume most recent training')
+    parser.add_argument('--opt_resume', nargs='?', const=True, default=False, help='resume most recent training')
     parser.add_argument('--nosave', action='store_true', help='only save final checkpoint')
     parser.add_argument('--notest', action='store_true', help='only test final epoch')
     parser.add_argument('--noautoanchor', action='store_true', help='disable autoanchor check')
